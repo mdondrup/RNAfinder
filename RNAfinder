@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -- -*-Perl-*-
+#!/usr/bin/env perl
 
 #############################################################################
 #                                                                           #
@@ -36,6 +36,7 @@
 
 require 5.00;
 use strict;
+use warnings;
 use Term::ANSIColor qw(:constants);
 $Term::ANSIColor::AUTORESET = 1;
 use PirObject qw( LinStruct RNAPredictionList RNAfinderFileForMenu AllerpinResult AnnotPairCollection);
@@ -833,18 +834,19 @@ sub RunErpinForAllItems {
         $erpinArg =~ s/"//g;
         my $ret = "";
         if (defined($cutoff)) {
-            print STDERR "nice -19 erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr\n" if $DEBUG;
-            $ret = system("nice -19 erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr");
+            print STDERR "erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr\n" if $DEBUG;
+            $ret = system("erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr");
         }
         else {
             print STDERR "nice -19 erpin $nr_model $nr_genome $erpinArg > $erpinOut 2> $erpinErr\n" if $DEBUG;
-            $ret = system("nice -19 erpin $nr_model $nr_genome $erpinArg > $erpinOut 2> $erpinErr");
+            $ret = system(" erpin $nr_model $nr_genome $erpinArg > $erpinOut 2> $erpinErr");
         }
 
         if (($ret >> 8) > 1 || (-s "$erpinOut" == 0) ) {
             print STDERR "There was an error running 'erpin'.\n";
             print STDERR "Content of STDERR output:\n";
             system("cat",$erpinErr);
+	    die "Bailing out\n";
         }
         exit 0;
     }
@@ -904,19 +906,19 @@ sub RunErpin {
 
     my $ret = "";
     if (defined($cutoff)) {
-        print STDERR "nice -19 erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff\n" if $DEBUG;
-        $ret = system("nice -19 erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr");
+        print STDERR " erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff\n" if $DEBUG;
+        $ret = system(" erpin $nr_model $nr_genome $erpinArg -cutoff $cutoff > $erpinOut 2> $erpinErr");
     }
     else {
-        print STDERR "nice -19 erpin $nr_model $nr_genome $erpinArg\n" if $DEBUG;
-        $ret = system("nice -19 erpin $nr_model $nr_genome $erpinArg > $erpinOut 2> $erpinErr");
+        print STDERR " erpin $nr_model $nr_genome $erpinArg\n" if $DEBUG;
+        $ret = system(" erpin $nr_model $nr_genome $erpinArg > $erpinOut 2> $erpinErr");
     }
 
     if (($ret >> 8) > 1 || (-s "$erpinOut" == 0) ) {
         print STDERR "There was an error running 'erpin'.\n";
         print STDERR "Content of STDERR output:\n";
         system("cat",$erpinErr);
-        exit 0; # cleanup will occur in END {}
+        exit 1; # cleanup will occur in END {}
     }
 }
 
